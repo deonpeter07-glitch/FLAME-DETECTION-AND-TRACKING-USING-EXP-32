@@ -1,0 +1,126 @@
+#define BLYNK_TEMPLATE_ID "YOUR_TEMPLATE_ID"
+#define BLYNK_TEMPLATE_NAME "Fire Alert Notification"
+#define BLYNK_AUTH_TOKEN "YOUR_AUTH_TOKEN"
+
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+#include <ESP32Servo.h>
+
+// Wi-Fi Credentials
+char ssid[] = "YOUR_WIFI_NAME";
+char pass[] = "YOUR_WIFI_PASSWORD";
+
+// Pins
+#define FLAME_SENSOR 27
+#define RELAY_PIN 23
+#define SERVO_SENSOR_PIN 18
+#define SERVO_PUMP_PIN 19
+
+Servo sensorServo;
+Servo pumpServo;
+
+int pos = 0;
+bool flameFound = false;
+bool alertSent = false;
+
+void setup()
+{
+  Serial.begin(115200);
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+
+  pinMode(FLAME_SENSOR, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+
+  digitalWrite(RELAY_PIN, HIGH); // Pump OFF
+
+  sensorServo.attach(SERVO_SENSOR_PIN, 500, 2400);
+  pumpServo.attach(SERVO_PUMP_PIN, 500, 2400);
+
+  sensorServo.write(90);
+  pumpServo.write(90);
+
+  delay(1000);
+  Serial.println("System Ready");
+}
+
+void loop()
+{
+  Blynk.run();
+
+  flameFound = false;
+
+  // Scan LEFT → RIGHT
+  for (pos = 0; pos <= 180; pos += 2)
+  {
+    Blynk.run();
+
+    sensorServo.write(pos);
+    pumpServo.write(pos);
+    delay(25);
+
+    if (digitalRead(FLAME_SENSOR) == LOW)
+    {
+      Serial.println("Flame Detected!");
+      flameFound = true;
+
+      if (!alertSent)
+      {
+        Blynk.logEvent("fire_alert", "Fire Detected!");
+        alertSent = true;
+      }
+
+      digitalWrite(RELAY_PIN, LOW); // Pump ON
+      delay(3000);
+
+      digitalWrite(RELAY_PIN, HIGH); // Pump OFF
+      break;
+    }
+  }
+
+  // Scan RIGHT → LEFT
+  if (!flameFound)
+  {
+    for (pos = 180; pos >= 0; pos -= 2)
+    {
+      Blynk.run();
+
+      sensorServo.write(pos);
+      pumpServo.write(pos);
+      delay(25);
+
+      if (digitalRead(FLAME_SENSOR) == LOW)
+      {
+        Serial.println("Flame Detected!");
+        flameFound = true;
+
+        if (!alertSent)
+        {
+          Blynk.logEvent("fire_alert", "Fire Detected!");
+          alertSent = true;
+        }
+
+        digitalWrite(RELAY_PIN, LOW);
+        delay(3000);
+
+        digitalWrite(RELAY_PIN, HIGH);
+        break;
+      }
+    }
+  }
+
+  // Keep spraying while flame is present
+  while (digitalRead(FLAME_SENSOR) == LOW)
+  {
+    Blynk.run();
+
+    Serial.println("Extinguishing...");
+    digitalWrite(RELAY_PIN, LOW);
+    delay(500);
+  }
+
+  // Reset alert when flame disappears
+  alertSent = false;
+
+  digitalWrite(RELAY_PIN, HIGH);
+}
