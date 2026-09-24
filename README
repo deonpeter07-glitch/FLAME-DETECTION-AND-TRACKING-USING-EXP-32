@@ -1,0 +1,62 @@
+# Flame Detection and Tracking System Using ESP32
+
+## Overview
+
+This project is an ESP32-based Flame Detection and Tracking System that detects fire using an IR flame sensor, tracks the flame direction with servo motors, and sends real-time notifications through the Blynk IoT platform. A relay-controlled water pump is activated automatically to help extinguish the detected flame.
+
+## Features
+
+* Flame detection using IR flame sensor
+* Automatic flame tracking with servo motors
+* Real-time fire alerts via Blynk IoT
+* Automatic water pump activation
+* ESP32 Wi-Fi connectivity
+* Low-cost fire safety solution
+
+## Hardware Components
+
+* ESP32 Development Board
+* IR Flame Sensor
+* 2 × SG90 Servo Motors
+* Relay Module
+* Water Pump
+* Buck Converter
+* Lithium-Ion Battery
+* Jumper Wires
+
+## Software
+
+* Arduino IDE
+* ESP32 Board Package
+* Blynk IoT
+* C++
+
+## Pin Configuration
+
+| Component    | ESP32 Pin |
+| ------------ | --------- |
+| Flame Sensor | GPIO 27   |
+| Relay Module | GPIO 23   |
+| Sensor Servo | GPIO 18   |
+| Pump Servo   | GPIO 19   |
+
+## Working
+
+1. The servo-mounted flame sensor continuously scans the area.
+2. When a flame is detected, the system identifies its direction.
+3. The pump nozzle aligns with the detected flame.
+4. A Blynk notification is sent to the user.
+5. The relay activates the water pump to suppress the fire.
+6. The system continues spraying until the flame is no longer detected.
+
+## Applications
+
+* Home Fire Safety
+* Smart Buildings
+* Industrial Monitoring
+* Laboratories and Workshops
+* IoT-Based Safety Systems
+
+## Author
+
+Deon
